@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import utils
+import itertools
 from Bio import PDB
 import structure_utils
 from sklearn.linear_model import Lasso, Ridge
@@ -79,8 +80,8 @@ def load_his3p_small_data():
         fitness = np.log(np.mean(np.exp(df['log_fitness'].loc[matches.index])))  # calculate mean if there are multiple fitness values
         y_match.append(fitness)
         bin_match.append(bin_seqs_[i])
-        
-    X = utils.walsh_hadamard_from_seqs(bin_match)
+    
+    X = utils.walsh_hadamard_from_seqs(np.array(bin_match))
     return X, np.array(y_match)
 
 
@@ -180,7 +181,7 @@ def load_his3p_big_data():
     return X, y
 
 
-def _get_binarized_contact_maps(which_data):
+def _get_binarized_contact_map(which_data):
     """
     Get the binarized contact map corresponding to either the mTagBFP (which='mtagbfp') 
     or His3p data (which='his3p').
@@ -224,7 +225,7 @@ def _calculate_wh_coefficients_complete(which_data):
     """
     if which_data == 'mtagbfp':
         X, y = load_mtagbfp_data()
-    elif which_data == 'his3p'
+    elif which_data == 'his3p':
         X, y = load_his3p_small_data()
     model = Lasso(alpha=1e-12)
     model.fit(X, y)

@@ -124,7 +124,8 @@ def walsh_hadamard_from_seqs(bin_seqs):
     L = len(bin_seqs_[0])
     all_U = list(powerset(range(0, L)))
     M = 2**L
-    X = np.zeros((M, len(all_U)))
+    N = len(bin_seqs)
+    X = np.zeros((N, len(all_U)))
     for i, U in enumerate(all_U):
         if len(U) == 0:
             X[:, i] = 1
