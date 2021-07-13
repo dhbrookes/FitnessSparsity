@@ -143,8 +143,6 @@ def find_his3p_big_sequences():
         int_match.append(int_seqs[i])
         idx_match.append(i)
         num += 1
-        if i % 1000 == 0:
-            print(i)
 
     save_dict = {"seq": int_match, "y": y_match, "idx": idx_match}
     np.save("../results/his3p_big_extant_match.npy", save_dict)
@@ -164,8 +162,6 @@ def build_his3p_big_fourier():
     encodings = utils.get_encodings(qs)
     for i, seq in enumerate(int_seqs):
         phi[i] = utils.fourier_for_seq(seq, encodings) / np.sqrt(M)
-        if i % 100 == 0:
-            print(i)
     np.save('../results/his3p_big_fourier.npy', phi)
 
 
@@ -187,7 +183,7 @@ def _get_binarized_contact_map(which_data):
     or His3p data (which='his3p').
     """
     if which_data == 'mtagbfp':
-        name = '3M24'
+        name = '3m24'
         pos = MTAGBFP_POSITIONS
     elif which_data == 'his3p':
         name = 'his3_itasser'

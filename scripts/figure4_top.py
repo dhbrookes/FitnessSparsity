@@ -10,34 +10,23 @@ from matplotlib import gridspec, rcParams
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 import gnk_model
-import C0_calculation
+import C_calculation
 import utils
 import structure_utils
 import data_utils
 
-plt.style.use('seaborn-deep')
-rcParams['savefig.dpi'] = 500
-rcParams['lines.linewidth'] = 1.0
-rcParams['axes.grid'] = True
-rcParams['axes.spines.right'] = True
-rcParams['axes.spines.top'] = True
-rcParams['grid.color'] = 'gray'
-rcParams['grid.alpha'] = 0.2
-rcParams['axes.linewidth'] = 0.5
-rcParams['mathtext.fontset'] = 'cm'
-rcParams['font.family'] = 'STIXGeneral'
-rcParams['xtick.major.pad']='2'
-rcParams['ytick.major.pad']='2'
-rcParams['xtick.direction']='in'
-rcParams['ytick.direction']='in'
-rcParams['xtick.major.size']='2'
-rcParams['ytick.major.size']='2'
-rcParams['xtick.major.width']='0.5'
-rcParams['ytick.major.width']='0.5'
+import warnings
+warnings.filterwarnings("ignore")
+
+plt.style.use(['seaborn-deep', 'plots/paper.mplstyle'])
 
 """
 This script produces the first row of Figure 4D, which displays the results
-of various tests on the mTagBFP empirical fitness function.
+of various tests on the mTagBFP empirical fitness function, and prints
+quantities related to this analysis. Run as:
+
+$ python figure4_top.py
+
 """
 
 q = 2
@@ -63,7 +52,7 @@ gnk_beta_var_ = gnk_model.calc_beta_var(L, q, V)
 gnk_beta_var = gnk_beta_var_/np.sum(gnk_beta_var_) # normalize beta
 gnk_sparsity = np.count_nonzero(gnk_beta_var)
 percent_var = 100*bm_fv[gnk_sparsity]
-num_samples = int(np.ceil(gnk_sparsity*C0_calculation.C0_VAL*np.log10(q**L)))
+num_samples = int(np.ceil(gnk_sparsity*C_calculation.C_VAL*np.log10(q**L)))
 print("Sparsity of mTagBFP Structural GNK model: %i" % gnk_sparsity)
 print("Number of samples to recover GNK: %s" % num_samples)
 print("Percent variance explained by largest %i empirical coefficients: %.3f" % (gnk_sparsity, percent_var))
@@ -122,6 +111,9 @@ ax.tick_params(axis='x', which='minor', rotation=60)
 ax.tick_params(axis='x', which='both', length=0)
 ax.tick_params(axis='y', which='both', length=0)
 
+ax.spines['right'].set_visible(True)
+ax.spines['top'].set_visible(True)
+
 ax.set_aspect('equal')
 ax.set_xlim([0, L])
 ax.set_ylim([0, L])
@@ -144,9 +136,6 @@ ax.bar(range(len(plot_pb_vals[:num])), plot_pb_vals[:num], width=3, facecolor=co
 ax.bar(range(len(plot_gnk_vals[:num])), -plot_gnk_vals[:num], width=3, facecolor=colors[0])
 
 ax.plot((-10, num),(0, 0), c='k')
-ax.spines['right'].set_visible(False)
-ax.spines['top'].set_visible(False)
-ax.spines['bottom'].set_visible(False)
 ticks = [np.sum([binom(13, j) for j in range(i)]) for i in range(13)]
 ticks = [t for t in ticks if t <= num]
 ordlbls = ["1st", "2nd", "3rd", "4th", "5th"]
@@ -175,7 +164,7 @@ ax.annotate("",
 ax.text(52, 0.63, "$r=1$")
     
 ax.tick_params(axis='y', which='major', direction='out')
-
+ax.spines['bottom'].set_visible(False)
 ax.set_xticks([])
 ax.set_ylim([-mv, mv])
 ax.set_yticks([-0.5, -0.25, 0, 0.25, 0.5])
@@ -215,9 +204,6 @@ leg.get_frame().set_edgecolor('k')
 leg.get_frame().set_linewidth(0.5)
 leg.get_frame().set_boxstyle('Square', pad=0.05)
 
-ax.spines['right'].set_visible(False)
-ax.spines['top'].set_visible(False)
-
 
 ###########################
 ### plot LASSO results  ###
@@ -236,8 +222,10 @@ ax2 = plt.subplot(gs_[1])
 colors = sns.color_palette('Set1')
 c = colors[1]
 # c = colors(0.6)
-ax1.errorbar(ns[2:-1], mean_r[2:-1], yerr=std_r[2:-1], lw=0.5, marker='o', markersize=0, c='k', zorder=12, fmt='none', capsize=1, markeredgewidth=0.5)
-ax2.errorbar(ns[2:], mean_r[2:], yerr=std_r[2:], c='k', lw=0.5, marker='o', markersize=0, zorder=12, fmt='none', capsize=1, markeredgewidth=0.5)
+ax1.errorbar(ns[2:-1], mean_r[2:-1], yerr=std_r[2:-1], lw=0.5, marker='o', markersize=0, 
+             c='k', zorder=12, fmt='none', capsize=1, markeredgewidth=0.5)
+ax2.errorbar(ns[2:], mean_r[2:], yerr=std_r[2:], c='k', lw=0.5, marker='o', markersize=0, 
+             zorder=12, fmt='none', capsize=1, markeredgewidth=0.5)
 ax1.plot(ns[2:-1], mean_r[2:-1], c=c, lw=1, marker='o', markersize=3, zorder=10)
 ax2.plot(ns[2:], mean_r[2:], c=c, lw=1, marker='o', markersize=3, zorder=10)
 
@@ -275,9 +263,9 @@ kwargs.update(transform=ax2.transAxes)  # switch to the bottom axes
 ax2.plot((-d, +d), (1 - height_ratio*d, 1 + height_ratio*d), **kwargs)  # bottom-left diagonal
 ax2.plot((1 - d, 1 + d), (1 - height_ratio*d, 1 + height_ratio*d), **kwargs)
 
-ax1.spines['right'].set_visible(False)
-ax2.spines['right'].set_visible(False)
-ax1.spines['top'].set_visible(False)
+# ax1.spines['right'].set_visible(False)
+# ax2.spines['right'].set_visible(False)
+# ax1.spines['top'].set_visible(False)
 
 ax1.tick_params(axis='y', which='major', right=False, labelright=False)
 ax1.tick_params(axis='x', which='major', top=False, labeltop=False)
@@ -309,4 +297,4 @@ axins.grid(False)
 
 plt.subplots_adjust(hspace=0.08)
 plt.tight_layout()
-plt.savefig("plots/mtagbfp_mega_panel.png", dpi=500, bbox_inches='tight', facecolor='white', transparent=False)
+plt.savefig("plots/figure4_top.png", dpi=500, bbox_inches='tight', facecolor='white', transparent=False)

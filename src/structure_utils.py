@@ -52,8 +52,6 @@ def calc_min_dist_contact_map(chain1, chain2=None):
                 resid_to_idx1[int(res2.id[1])] = j
             else:
                 resid_to_idx2[int(res2.id[1])] = j
-        if i % 100 == 0:
-            print("%i / %i residues processed" % (i, l1) )
             
     # Set missing distances larger than maximum distance in structure.
     missing_value = np.amax(contact_map) + 1.0

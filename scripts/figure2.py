@@ -9,28 +9,13 @@ import matplotlib.pyplot as plt
 import gnk_model
 import utils
 
-plt.style.use('seaborn-deep')
-rcParams['savefig.dpi'] = 500
-rcParams['lines.linewidth'] = 1.0
-rcParams['axes.grid'] = True
-rcParams['axes.spines.right'] = False
-rcParams['axes.spines.top'] = False
-rcParams['grid.color'] = 'gray'
-rcParams['grid.alpha'] = 0.2
-rcParams['axes.linewidth'] = 0.5
-rcParams['mathtext.fontset'] = 'cm'
-rcParams['font.family'] = 'STIXGeneral'
-rcParams['xtick.major.pad']='2'
-rcParams['ytick.major.pad']='2'
-rcParams['xtick.direction']='in'
-rcParams['ytick.direction']='in'
-rcParams['xtick.major.size']='2'
-rcParams['ytick.major.size']='2'
-rcParams['xtick.major.width']='0.5'
-rcParams['ytick.major.width']='0.5'
+plt.style.use(['seaborn-deep', 'plots/paper.mplstyle'])
 
 """
-This script produces Figure 2.
+This script produces Figure 2. Run as:
+
+$ python figure2.py
+
 """
 
 fig, axes = plt.subplots(2, 2, figsize=(6, 6))
@@ -146,7 +131,7 @@ plt.tight_layout()  ## keep this here
 ###########################
 
 ax = axes[1, 1]
-C_recovery_dict = np.load("results/C_recovery.npy", allow_pickle=True).item()
+C_recovery_dict = np.load("../results/C_recovery.npy", allow_pickle=True).item()
 Cs = C_recovery_dict['Cs']
 frac_recovered = C_recovery_dict['frac_recovered']
 overall = np.mean(frac_recovered, axis=0)
@@ -164,4 +149,4 @@ ax.set_ylabel("Fraction Recovered at $C \cdot S \log(q^L)$", fontsize=12)
 ax.set_xlim([0, 3])
 ax.set_ylim([-0.01, 1.01])
 
-plt.savefig('plots/gnk_sparsity.png', dpi=300, bbox_inches='tight', facecolor='white', transparent=False)
+plt.savefig('plots/figure2.png', dpi=300, bbox_inches='tight', facecolor='white', transparent=False)

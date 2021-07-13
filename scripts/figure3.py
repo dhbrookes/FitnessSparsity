@@ -7,31 +7,16 @@ import matplotlib.ticker as mticker
 import matplotlib.pyplot as plt
 
 import gnk_model
+import C_calculation
 
-plt.style.use('seaborn-deep')
-rcParams['lines.linewidth'] = 1.0
-rcParams['axes.grid'] = True
-rcParams['axes.spines.right'] = False
-rcParams['axes.spines.top'] = False
-rcParams['grid.color'] = 'gray'
-rcParams['grid.alpha'] = 0.2
-rcParams['axes.linewidth'] = 0.5
-rcParams['mathtext.fontset'] = 'cm'
-rcParams['font.family'] = 'STIXGeneral'
-rcParams['xtick.major.pad']='2'
-rcParams['ytick.major.pad']='2'
-rcParams['xtick.direction']='in'
-rcParams['ytick.direction']='in'
-rcParams['xtick.major.size']='2'
-rcParams['ytick.major.size']='2'
-rcParams['xtick.major.width']='0.5'
-rcParams['ytick.major.width']='0.5'
+plt.style.use(['seaborn-deep', 'plots/paper.mplstyle'])
 
 """
-This script produces Figure 3.
-"""
+This script produces Figure 3. Run as:
 
-C0 = 2.62
+$ python figure3.py
+
+"""
 
 fig, axes = plt.subplots(1, 2, figsize=(6, 3))
 
@@ -49,7 +34,7 @@ for i, K in enumerate(Ks):
     Ls.append(L_vals)
     SL = np.zeros(len(L_vals), dtype=int)
     for j, L in enumerate(L_vals):
-        SL[j] = C0*L*np.log10(q)*gnk_model.calc_max_rn_sparsity(L, q, K)
+        SL[j] = C_calculation.C_VAL*L*np.log10(q)*gnk_model.calc_max_rn_sparsity(L, q, K)
     SLs.append(SL)
     
 colors = sns.color_palette('rocket_r', n_colors=len(Ks))
@@ -82,7 +67,7 @@ Ks = [1, 2, 3, 4, 5]
 Sq2 = np.zeros((len(Ks), len(qs)), dtype=int)
 for i, K in enumerate(Ks):
     for j, q in enumerate(qs):
-        Sq2[i, j] = C0*L*np.log10(q)*gnk_model.calc_max_rn_sparsity(L, q, K)
+        Sq2[i, j] = C_calculation.C_VAL*L*np.log10(q)*gnk_model.calc_max_rn_sparsity(L, q, K)
 
 colors = sns.color_palette('rocket_r', n_colors=len(Ks))
 q_select = np.array([2, 4, 20])
@@ -97,4 +82,4 @@ ax.set_yscale('log')
 ax.set_ylim([10**2, 10**10])
 
 plt.tight_layout()
-plt.savefig('plots/gnk_recovery.png', dpi=500, bbox_inches='tight', facecolor='white', transparent=False)
+plt.savefig('plots/figure3.png', dpi=500, bbox_inches='tight', facecolor='white', transparent=False)

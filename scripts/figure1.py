@@ -9,20 +9,15 @@ import matplotlib.pyplot as plt
 import gnk_model
 import utils
 
-plt.style.use('seaborn-deep')
-rcParams['savefig.dpi'] = 500
-rcParams['lines.linewidth'] = 1.0
-rcParams['axes.grid'] = True
+plt.style.use(['seaborn-deep', 'plots/paper.mplstyle'])
 rcParams['axes.spines.right'] = True
 rcParams['axes.spines.top'] = True
-rcParams['grid.color'] = 'gray'
-rcParams['grid.alpha'] = 0.2
-rcParams['axes.linewidth'] = 0.5
-rcParams['mathtext.fontset'] = 'cm'
-rcParams['font.family'] = 'STIXGeneral'
 
 """
-This script produces Figure 1.
+This script produces Figure 1. Run as:
+
+$ python figure1.py
+
 """
 
 L = 9
@@ -60,5 +55,5 @@ for i, ax in enumerate(axes):
     ax.tick_params(axis='y', which='both', length=0)
     
 plt.tight_layout()
-plt.savefig('plots/neighborhood_schemes_.png', dpi=500, facecolor='white', transparent=False)
+plt.savefig('plots/figure1.png', dpi=500, facecolor='white', transparent=False)
 plt.show()

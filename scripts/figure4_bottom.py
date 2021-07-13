@@ -10,34 +10,23 @@ from matplotlib import gridspec, rcParams
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 import gnk_model
-import C0_calculation
+import C_calculation
 import utils
 import structure_utils
 import data_utils
 
-plt.style.use('seaborn-deep')
-rcParams['savefig.dpi'] = 500
-rcParams['lines.linewidth'] = 1.0
-rcParams['axes.grid'] = True
-rcParams['axes.spines.right'] = True
-rcParams['axes.spines.top'] = True
-rcParams['grid.color'] = 'gray'
-rcParams['grid.alpha'] = 0.2
-rcParams['axes.linewidth'] = 0.5
-rcParams['mathtext.fontset'] = 'cm'
-rcParams['font.family'] = 'STIXGeneral'
-rcParams['xtick.major.pad']='2'
-rcParams['ytick.major.pad']='2'
-rcParams['xtick.direction']='in'
-rcParams['ytick.direction']='in'
-rcParams['xtick.major.size']='2'
-rcParams['ytick.major.size']='2'
-rcParams['xtick.major.width']='0.5'
-rcParams['ytick.major.width']='0.5'
+import warnings
+warnings.filterwarnings("ignore")
+
+plt.style.use(['seaborn-deep', 'plots/paper.mplstyle'])
 
 """
 This script produces the second row of Figure 4D, which displays the results
-of various tests on the His3p(small) empirical fitness function.
+of various tests on the His3p(small) empirical fitness function, and prints
+quantities related to this analysis. Run as:
+
+$ python figure4_bottom.py
+
 """
 
 q = 2
@@ -63,7 +52,7 @@ gnk_beta_var_ = gnk_model.calc_beta_var(L, q, V)
 gnk_beta_var = gnk_beta_var_/np.sum(gnk_beta_var_) # normalize beta
 gnk_sparsity = np.count_nonzero(gnk_beta_var)
 percent_var = 100*bm_fv[gnk_sparsity]
-num_samples = int(np.ceil(gnk_sparsity*C0_calculation.C0_VAL*np.log10(q**L)))
+num_samples = int(np.ceil(gnk_sparsity*C_calculation.C_VAL*np.log10(q**L)))
 print("Sparsity of His3p(small) Structural GNK model: %i" % gnk_sparsity)
 print("Number of samples to recover GNK: %s" % num_samples)
 print("Percent variance explained by largest %i empirical coefficients: %.3f" % (gnk_sparsity, percent_var))
@@ -131,6 +120,8 @@ ax.set_aspect('equal', adjustable='box')
 ax.set_xlim([0, L])
 ax.set_ylim([0, L])
 
+ax.spines['right'].set_visible(True)
+ax.spines['top'].set_visible(True)
 
 ##########################
 ## Plot beta comparison ##
@@ -149,8 +140,6 @@ ax.bar(range(len(plot_bb_vals)), plot_bb_vals, width=3, facecolor=colors[1])
 ax.bar(range(len(plot_gnk_vals)), -plot_gnk_vals, width=3, facecolor=colors[0])
 
 ax.plot((-10, num),(0, 0), c='k')
-ax.spines['right'].set_visible(False)
-ax.spines['top'].set_visible(False)
 ax.spines['bottom'].set_visible(False)
 ticks = [np.sum([binom(L, j) for j in range(i)]) for i in range(L+1)]
 ticks = [t for t in ticks if t <= num]
@@ -217,8 +206,6 @@ leg = ax.legend(fontsize=10, labelspacing=0.15, bbox_to_anchor=(0.05,0), loc='lo
 leg.get_frame().set_edgecolor('k')
 leg.get_frame().set_linewidth(0.5)
 leg.get_frame().set_boxstyle('Square', pad=0.05)
-ax.spines['right'].set_visible(False)
-ax.spines['top'].set_visible(False)
 
 
 ###############################
@@ -243,9 +230,6 @@ ax.set_ylabel("Prediction $R^2$", labelpad=2, fontsize=12)
 ax.set_xlabel("Number of training samples", fontsize=12)
 ax.set_xlim([0, 2000])
 ax.set_ylim([0, 1])
-ax.spines['right'].set_visible(False)
-ax.spines['top'].set_visible(False)
-
 
 axins = inset_axes(ax, width="75%", height="95%",
                    bbox_to_anchor=(0.5, 0.25, .6, .5),
@@ -271,4 +255,4 @@ ax.set_yticklabels(["0", "0.2", "0.4","0.6", "0.8", "1.0"])
 
 
 plt.tight_layout()
-plt.savefig("plots/his3p_small_mega_panel.png", dpi=500, bbox_inches='tight', facecolor='white', transparent=False)
+plt.savefig("plots/figure4_bottom.png", dpi=500, bbox_inches='tight', facecolor='white', transparent=False)
