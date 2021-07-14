@@ -145,7 +145,7 @@ def find_his3p_big_sequences():
         num += 1
 
     save_dict = {"seq": int_match, "y": y_match, "idx": idx_match}
-    np.save("../results/his3p_big_extant_match.npy", save_dict)
+    np.save("../results/his3p_big_data.npy", save_dict)
     
     
 def build_his3p_big_fourier():
@@ -153,8 +153,8 @@ def build_his3p_big_fourier():
     Converts the His3p(big) sequences into Fourier encodings. The resulting
     matrix is quite large (~20GB) and is saved into the results folder.
     """
-    qs = [2, 2, 3, 2, 2, 3, 3, 4, 2, 4, 4]
-    save_dict = np.load("../results/his3p_big_extant_match.npy",allow_pickle=True).item()
+    qs = HIS3P_BIG_QS
+    save_dict = np.load("../results/his3p_big_data.npy",allow_pickle=True).item()
     int_seqs = save_dict['seq']
     M = np.prod(qs)
     N = len(int_seqs)
@@ -171,13 +171,13 @@ def load_his3p_big_data():
     the data  as (X, y), where X is a matrix of Fourier encodings of sequences 
     and y is an array of corresponding fitness values.
     """
-    save_dict = np.load("../results/his3p_big_extant_match.npy", allow_pickle=True).item()
+    save_dict = np.load("../results/his3p_big_data.npy", allow_pickle=True).item()
     y = np.array(save_dict['y'])
     X = np.load("../results/his3p_big_fourier.npy")
     return X, y
 
 
-def _get_binarized_contact_map(which_data):
+def _get_binarized_contact_map(which_data, threshold=4.5):
     """
     Get the binarized contact map corresponding to either the mTagBFP (which='mtagbfp') 
     or His3p data (which='his3p').
@@ -192,38 +192,43 @@ def _get_binarized_contact_map(which_data):
     chains = structure.get_chains()
     chain1 = next(chains)
     contact_map, resid2idx  = structure_utils.calc_min_dist_contact_map(chain1) 
-    bin_cm = structure_utils.binarize_contact_map(contact_map, threshold=4.5)
+    bin_cm = structure_utils.binarize_contact_map(contact_map, threshold=threshold)
     pos_in_cm = [resid2idx[p] for p in pos]
     bin_cm_sub = bin_cm[pos_in_cm][:, pos_in_cm]
     return bin_cm_sub
 
 
-def get_mtagbfp_binarized_contact_map():
+def get_mtagbfp_binarized_contact_map(threshold=4.5):
     """
     Returns the binarized contact map of the mTagBFP structure, for the positions in
     the empirical fitness function of Poelwijk, et. al. (2019).
     """
-    return _get_binarized_contact_map('mtagbfp')
+    return _get_binarized_contact_map('mtagbfp', threshold=threshold)
 
 
-def get_his3p_binarized_contact_map():
+def get_his3p_binarized_contact_map(threshold=4.5):
     """
     Returns the binarized contact map of the His3p I-TASSER predicted structure, 
     for the positions in the empirical fitness function of Pokusaeva, et. al. (2019).
     """
-    return _get_binarized_contact_map('his3p')
+    return _get_binarized_contact_map('his3p', threshold=threshold)
 
 
 def _calculate_wh_coefficients_complete(which_data):
     """
-    Calculate the WH coefficients of the complete mTagBFP (which_data='mtagbfp')
-    or His3p small (which_data='his3p') empirical fitness functions.
+    Calculate the WH coefficients of the complete mTagBFP (which_data='mtagbfp'),
+    His3p(small) (which_data='his3p_small') or His3p(big) (which_data='his3p_big') 
+    empirical fitness functions.
     """
+    alpha = 1e-12
     if which_data == 'mtagbfp':
         X, y = load_mtagbfp_data()
-    elif which_data == 'his3p':
+    elif which_data == 'his3p_small':
         X, y = load_his3p_small_data()
-    model = Lasso(alpha=1e-12)
+    elif which_data == 'his3p_big':
+        X, y = load_his3p_big_data()
+        alpha = 1e-10
+    model = Lasso(alpha=alpha)
     model.fit(X, y)
     beta = model.coef_
     beta[0] = model.intercept_
@@ -241,4 +246,11 @@ def calculate_his3p_small_wh_coefficients():
     """
     Calculate the Walsh-Hadamard coefficients of the His3p(small) fitness functions
     """
-    return _calculate_wh_coefficients_complete('his3p')
+    return _calculate_wh_coefficients_complete('his3p_small')
+
+
+def calculate_his3p_big_wh_coefficients():
+    """
+    Calculate the Fourier coefficients of the His3p(big) fitness functions
+    """
+    return _calculate_wh_coefficients_complete('his3p_big')

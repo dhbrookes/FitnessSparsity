@@ -6,7 +6,7 @@ from scipy.stats import pearsonr
 from scipy.special import binom
 import matplotlib.ticker as ticker
 import matplotlib.pyplot as plt
-from matplotlib import gridspec, rcParams
+from matplotlib import gridspec
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 import gnk_model

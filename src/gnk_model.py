@@ -156,11 +156,3 @@ def calc_beta_var(L, qs, V):
         beta_var_U.append(bv_expand)
     beta_var = np.concatenate(beta_var_U)
     return beta_var
-
-
-def calc_beta_var_single_q(L, q, V):
-    """
-    Calculates the variance of beta coefficients for a given sequence length, L,
-    the alphabet size (same at every position), and neighborhoods.
-    """
-    return calc_beta_var(L, [q]*L, V)

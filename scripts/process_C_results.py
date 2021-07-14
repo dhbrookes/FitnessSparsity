@@ -1,4 +1,8 @@
-import numpy np
+import sys
+sys.path.append("../src")
+import numpy as np
+
+import C_calculation
 
 """
 This script processes the results of the calculations to
@@ -38,18 +42,6 @@ def determine_N_for_recovery(Ns, fv_beta, frac_var_tol=0.01):
 
 if __name__ == "__main__":
     frac_var_tol = 0.0001
-
-    tested = [(10, 2, 1), (10, 2, 2), (10, 2, 3), (10, 2, 4), (10, 2, 5),
-              (11, 2, 1), (11, 2, 2), (11, 2, 3), (11, 2, 4), (11, 2, 5),
-              (12, 2, 1), (12, 2, 2), (12, 2, 3), (12, 2, 4), (12, 2, 5),
-              (13, 2, 1), (13, 2, 2), (13, 2, 3), (13, 2, 4), (13, 2, 5),
-              (5, 4, 1), (5, 4, 2), (5, 4, 3),
-              (6, 4, 1), (6, 4, 2), (6, 4, 3),
-              (7, 4, 1), (7, 4, 2), (7, 4, 3), 
-              (6, 3, 1), (6, 3, 2), (6, 3, 3),
-              (7, 3, 1), (7, 3, 2), (7, 3, 3),
-              (8, 3, 1), (8, 3, 2), (8, 3, 3),
-             ]
     
     # determine C required for recovery in each tested case
     C_alls = np.zeros((len(tested), 25))  # 5 beta samples x 5 training set replicates = 25
