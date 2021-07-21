@@ -1,9 +1,10 @@
 import numpy as np
-import utils
+from tqdm import tqdm
 from sklearn.linear_model import Lasso, LassoCV
 from sklearn.model_selection import train_test_split
 
 import gnk_model
+import utils
 
 
 """
@@ -84,9 +85,7 @@ def lasso_test_single_N(X, y, beta, N, training_replicates=5):
     return frac_variances, alpha_bests
 
 
-def lasso_test(L, q, betas, Ns,
-               training_replicates=5,  
-               verbose=False, noise_var=0):
+def lasso_test(L, q, betas, Ns, training_replicates=5, noise_var=0):
     """
     Runs the LASSO test for given sequence length (L), alphabet size (q),
     list of sample Fourier coefficients (betas), and list of training set 
@@ -101,17 +100,15 @@ def lasso_test(L, q, betas, Ns,
     frac_zeros = np.zeros((len(Ns), num_betas, training_replicates))
     alphas = np.zeros((len(Ns), num_betas, training_replicates))
     ys = np.array([np.dot(X, beta) + np.sqrt(noise_var) * np.random.randn(M) for beta in betas])
-    
-    for i, N in enumerate(Ns):
-        for j, beta in enumerate(betas):
+    print("Running LASSO tests...")
+    for i, N in enumerate(tqdm(Ns)):
+        for j, beta in enumerate(tqdm(betas)):
             y = ys[j]
             fv_N, alphas_N = lasso_test_single_N(X, y, beta, N, 
                                                  training_replicates=training_replicates
                                                 )
             frac_variances[i, j] = fv_N
             alphas[i, j] = alphas_N
-            if verbose:
-                print("%i / %i Ns and %i / %i beta replicates" %(i+1, len(Ns), j+1, num_betas))
     return frac_variances, alphas
 
 
@@ -145,8 +142,8 @@ def run_LK(L, q, K, verbose=False, num_Ns=50,
     
 
     fv, alphas = lasso_test(L, q, betas, Ns,
-                                training_replicates=5, 
-                                verbose=verbose)
+                                training_replicates=5
+                           )
     results = {'N': Ns,
                'beta': betas,
                'S_beta': S_beta,

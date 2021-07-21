@@ -98,6 +98,8 @@ def fourier_from_seqs(int_seqs, qs):
     Returns an N x M array containing the Fourier encodings of a given list of 
     N sequences with alphabet sizes qs.
     """
+    if type(qs) == int:
+        qs = [qs]*len(int_seqs[0])
     M = np.prod(qs)
     N = len(int_seqs)
     encodings = get_encodings(qs)
@@ -135,7 +137,21 @@ def walsh_hadamard_from_seqs(bin_seqs):
     return X
 
 
-def calc_frac_var_explained(beta_var, samples=1000, up_to=None):
+def calc_frac_var_explained(beta):
+    """
+    Calculates the fraction varianc explained by the largest elements in a
+    given vector beta.
+    """
+    beta_sq = beta**2
+    beta_sq /= np.sum(beta_sq)
+    bm_sorted = sorted(beta_sq, reverse=True)
+    bm_fv = np.zeros(len(bm_sorted))
+    for i in range(len(bm_sorted)):
+        bm_fv[i] = np.sum(bm_sorted[:i])
+    return bm_fv
+    
+
+def calc_frac_var_explained_from_beta_var(beta_var, samples=1000, up_to=None):
     """
     Numerically calculates the fraction variance explained by the largest elements in
     samples of a normally distributed random vector with variances given by beta_var. 

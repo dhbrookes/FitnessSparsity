@@ -31,20 +31,7 @@ def calc_bn_sparsity(L, q, K):
 
 def calc_an_sparsity(L, q, K):
     """Calculates sparsity of Adjacent Neighborhood scheme"""
-    sparsity = 0
-    for r in range(K+1):
-        nr = (L-K+1)*binom(K-1, r-1) + binom(K-1, r)
-        sparsity += nr * (q-1)**r
-    return sparsity
-
-
-def calc_an_sparsity_periodic(L, q, K):
-    """Calculates sparsity of Adjacent Neighborhood scheme"""
-    sparsity = 1
-    for r in range(1, K+1):
-        nr = L*binom(K-1, r-1)
-        sparsity += nr * (q-1)**r
-    return sparsity
+    return 1 + L*(q-1)*q**(K-1)
 
 
 def _calc_set_prob(r, L, K):

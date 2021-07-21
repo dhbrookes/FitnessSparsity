@@ -1,10 +1,12 @@
 import pandas as pd
 import numpy as np
-import utils
 import itertools
 from Bio import PDB
+from tqdm import tqdm
+from sklearn.linear_model import Lasso
+
 import structure_utils
-from sklearn.linear_model import Lasso, Ridge
+import utils
 
 
 """
@@ -134,7 +136,8 @@ def find_his3p_big_sequences():
     int_match =[]
     y_match = []
     idx_match = []
-    for i, s in enumerate(best_combos):
+    print("Finding sequences in data...")
+    for i, s in enumerate(tqdm(best_combos)):
         matches = mut_seqs.loc[mut_seqs == s]
         if len(matches) == 0:
             continue
@@ -160,7 +163,8 @@ def build_his3p_big_fourier():
     N = len(int_seqs)
     phi = np.zeros((N, M))
     encodings = utils.get_encodings(qs)
-    for i, seq in enumerate(int_seqs):
+    print("Calculating Fourier encoding for each sequence...")
+    for i, seq in enumerate(tqdm(int_seqs)):
         phi[i] = utils.fourier_for_seq(seq, encodings) / np.sqrt(M)
     np.save('../results/his3p_big_fourier.npy', phi)
 
@@ -177,11 +181,12 @@ def load_his3p_big_data():
     return X, y
 
 
-def _get_binarized_contact_map(which_data, threshold=4.5):
+def _get_contact_map(which_data):
     """
-    Get the binarized contact map corresponding to either the mTagBFP (which='mtagbfp') 
-    or His3p data (which='his3p').
+    Returns the contact map corresponding to either the mTagBFP 
+    (which_data='mtagbfp') or His3p data (which_data='his3p'). 
     """
+    
     if which_data == 'mtagbfp':
         name = '3m24'
         pos = MTAGBFP_POSITIONS
@@ -192,10 +197,35 @@ def _get_binarized_contact_map(which_data, threshold=4.5):
     chains = structure.get_chains()
     chain1 = next(chains)
     contact_map, resid2idx  = structure_utils.calc_min_dist_contact_map(chain1) 
-    bin_cm = structure_utils.binarize_contact_map(contact_map, threshold=threshold)
     pos_in_cm = [resid2idx[p] for p in pos]
-    bin_cm_sub = bin_cm[pos_in_cm][:, pos_in_cm]
-    return bin_cm_sub
+    cm_sub = contact_map[pos_in_cm][:, pos_in_cm]
+    return cm_sub
+    
+
+def _get_binarized_contact_map(which_data, threshold=4.5):
+    """
+    Returns the binarized contact map corresponding to either the mTagBFP 
+    (which_data='mtagbfp') or His3p data (which_data='his3p').
+    """
+    cm_sub = _get_contact_map(which_data)
+    bin_cm = structure_utils.binarize_contact_map(cm_sub, threshold=threshold)
+    return bin_cm
+
+
+def get_mtagbfp_contact_map():
+    """
+    Returns the contact map of the mTagBFP structure, for the positions in
+    the empirical fitness function of Poelwijk, et. al. (2019).
+    """
+    return _get_contact_map('mtagbfp')
+
+
+def get_his3p_contact_map():
+    """
+    Returns the contact map of the His3p I-TASSER predicted structure, for the 
+    positions in the empirical fitness function of Pokusaeva, et. al. (2019).
+    """
+    return _get_contact_map('his3p')
 
 
 def get_mtagbfp_binarized_contact_map(threshold=4.5):

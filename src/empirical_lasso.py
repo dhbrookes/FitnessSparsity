@@ -4,6 +4,7 @@ from sklearn.linear_model import Lasso, LassoCV
 from sklearn.model_selection import train_test_split
 from scipy.stats import pearsonr
 from collections import Counter
+from tqdm import tqdm
 
 import utils
 import gnk_model
@@ -27,8 +28,9 @@ def run_lasso_experiment(X, y, alpha, ns, savefile, save_example_at=None,
     ns = np.array(np.sort(list(ns))).astype(int)
     mse = np.zeros((len(ns), replicates))
     pearson = np.zeros((len(ns), replicates))
-    for i, n in enumerate(ns):
-        for j in range(replicates):
+    print("Running LASSO tests...")
+    for i, n in enumerate(tqdm(ns)):
+        for j in range(tqdm(replicates)):
             model = Lasso(alpha=alpha)
             X_train, _, y_train, _ = train_test_split(X, y, train_size=n)
             model.fit(X_train, y_train)
