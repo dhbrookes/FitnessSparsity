@@ -121,7 +121,7 @@ plot_utils.plot_percent_variance_explained(ax, 100*bm_fv,
 
 ax = fig.add_subplot(gs[0, 3])
 
-plot_utils.plot_lasso_results(ax, results_dict, pred_num_samples, 
+plot_utils.plot_lasso_results(ax, results_dict, num_samples, 
                    xlim=20000, print_name='His3p(big)')
 axins = inset_axes(ax, width="75%", height="95%",
                    bbox_to_anchor=(0.5, 0.15, .6, .5),
@@ -138,4 +138,4 @@ his3p_big_inset_kwargs = {
 plot_utils.plot_lasso_example_inset(axins, example_results, **his3p_big_inset_kwargs)
 
 plt.tight_layout() 
-plt.savefig("plots/supp_fig_his3p_big.png", dpi=500, bbox_inches='tight', facecolor='white', transparent=False)
+plt.savefig("plots/supp_fig_his3p_big.png", dpi=500, bbox_inches='tight')

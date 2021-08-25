@@ -425,20 +425,24 @@ def calculate_rna_fourier_coefficients(fast=True):
         return _calculate_wh_coefficients_complete('rna')
 
 
-def calculate_mtagbfp_gnk_wh_coefficient_vars():
+def calculate_mtagbfp_gnk_wh_coefficient_vars(return_neighborhoods=False):
     """
     Returns the variances of WH coefficients in GNK fitness functions with Structural
-    neighborhoods corresponding to the TagBFP structure.
+    neighborhoods corresponding to the TagBFP structure. If return_neighborhoods is
+    True then the Structural neighborhoods are also returned
     """
     L = 13
     q = 2
     mtag_bin_cm = get_mtagbfp_binarized_contact_map()
     mtag_V = structure_utils.contact_map_to_neighborhoods(mtag_bin_cm)
     mtag_gnk_beta_var = gnk_model.calc_beta_var(L, q, mtag_V)
-    return mtag_gnk_beta_var
+    if return_neighborhoods:
+        return mtag_gnk_beta_var, mtag_V
+    else:
+        return mtag_gnk_beta_var
 
 
-def calculate_his3p_small_gnk_wh_coefficient_vars():
+def calculate_his3p_small_gnk_wh_coefficient_vars(return_neighborhoods=False):
     """
     Returns the variances of WH coefficients in GNK fitness functions with 
     Structural neighborhoods corresponding to the His3p structure.
@@ -448,4 +452,7 @@ def calculate_his3p_small_gnk_wh_coefficient_vars():
     his3p_bin_cm = get_his3p_binarized_contact_map()
     his3p_V = structure_utils.contact_map_to_neighborhoods(his3p_bin_cm)
     his3p_gnk_beta_var = gnk_model.calc_beta_var(L, q, his3p_V)
-    return his3p_gnk_beta_var
+    if return_neighborhoods:
+        return his3p_gnk_beta_var, his3p_V
+    else:
+        return his3p_gnk_beta_var

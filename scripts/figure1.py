@@ -36,5 +36,5 @@ for i, ax in enumerate(axes):
     plot_utils.plot_neighborhoods(ax, V, L, range(1, L+1), label_rotation=0, s=120)
     
 plt.tight_layout()
-plt.savefig('plots/figure1.png', dpi=500, facecolor='white', transparent=False)
+plt.savefig('plots/figure1.png', dpi=500)
 plt.show()

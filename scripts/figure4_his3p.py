@@ -39,7 +39,7 @@ beta_mag_sq = emp_beta**2 / np.sum(emp_beta**2)  # normalize sum of squares to o
 bm_fv = utils.calc_frac_var_explained(emp_beta)
 
 # get gnk_coefficients
-gnk_beta_var_ = data_utils.calculate_his3p_small_gnk_wh_coefficient_vars()
+gnk_beta_var_, V = data_utils.calculate_his3p_small_gnk_wh_coefficient_vars(return_neighborhoods=True)
 gnk_beta_var = gnk_beta_var_/np.sum(gnk_beta_var_) # normalize sum of variances to one
 gnk_sparsity = np.count_nonzero(gnk_beta_var)
 pv_at_gnk = 100*bm_fv[gnk_sparsity]

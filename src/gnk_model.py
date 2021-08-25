@@ -63,19 +63,7 @@ def calc_max_rn_sparsity(L, q, K):
     return bd
 
 
-def build_adj_neighborhoods(L, K):
-    """Build neighborhoods according to the Adjacent Neighborhood scheme"""
-    V = []
-    M = (K-1)/2
-    for i in range(L):
-        bi = np.floor(np.max([1, (i+1)-M])).astype(int)
-        ai = np.floor(np.min([L, (i+1)+M])).astype(int)
-        Vi = list(range(bi, ai+1))
-        V.append(Vi)
-    return V
-
-
-def build_adj_neighborhoods_periodic(L, K, symmetric=True):
+def build_adj_neighborhoods(L, K, symmetric=True):
     """Build Adjacent Neighborhoods with periodic boundary conditions"""
     V = []
     M = (K-1)/2
@@ -84,7 +72,7 @@ def build_adj_neighborhoods_periodic(L, K, symmetric=True):
             start = np.floor(i-M)
         else:
             start = i
-        Vi = [((start + j) % L)+1 for j in range(K)]
+        Vi = [int(((start + j) % L)+1) for j in range(K)]
         V.append(Vi)
     return V
 
@@ -120,7 +108,7 @@ def calc_beta_var(L, qs, V):
     """
     if type(qs) is int:
         qs = [qs]*L
-    all_U = list(utils.powerset(range(1, L+1)))
+    all_U = utils.get_all_interactions(L, index_1=True) # index by 1 to match neighborhoods
     z = np.prod(qs)
     beta_var_U = []
     facs = []
@@ -143,3 +131,36 @@ def calc_beta_var(L, qs, V):
         beta_var_U.append(bv_expand)
     beta_var = np.concatenate(beta_var_U)
     return beta_var
+
+
+def sample_gnk_fitness_function(L, qs, K=None,  V='random'):
+    """
+    Sample a GNK fitness function given the sequence length, alphabet sizes
+    and neighborhoods. If V='random', V='block', or V='adjacent', then
+    the neighborhoods will be set to the corresponding standard neighborhood
+    scheme. Otherwise, V must be a list of neighborhoods. 
+    """
+    if type(V) is str:
+        assert K is not None
+    if V == 'random':
+        V = sample_random_neighborhoods(L, K)
+    elif V == 'adjacent':
+        V = build_adj_neighborhoods(L, K)
+    elif V == 'block':
+        V = build_block_neighborhoods(L, K)
+
+    beta_var = calc_beta_var(L, qs, V)
+    use_wh = False
+    if type(qs) is int:
+        if qs == 2:
+            use_wh = True
+        qs = [qs]*L
+    alphs = [list(range(q)) for q in qs]
+    seqs = list(itertools.product(*alphs))
+    if use_wh:
+        phi = utils.walsh_hadamard_from_seqs(seqs)
+    else:
+        phi = utils.fourier_from_seqs(seqs, qs)
+    beta = np.random.randn(len(beta_var))*np.sqrt(beta_var)
+    f = np.dot(phi, beta)
+    return f

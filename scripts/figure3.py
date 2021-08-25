@@ -82,4 +82,4 @@ ax.set_yscale('log')
 ax.set_ylim([10**2, 10**10])
 
 plt.tight_layout()
-plt.savefig('plots/figure3.png', dpi=500, bbox_inches='tight', facecolor='white', transparent=False)
+plt.savefig('plots/figure3.png', dpi=500, bbox_inches='tight')

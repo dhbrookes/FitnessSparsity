@@ -18,6 +18,21 @@ def powerset(iterable):
     return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
 
 
+def get_all_interactions(L, index_1=False):
+    """
+    Returns a list of all epistatic interactions for a given sequence length.
+    This sets of the order used for beta coefficients throughout the code.
+    If index_1=True, then returns epistatic interactions corresponding to 
+    1-indexing.
+    """
+    if index_1:
+        pos = range(1, L+1)
+    else:
+        pos = range(L)
+    all_U = list(powerset(pos))
+    return all_U
+    
+    
 def complete_graph_evs(q):
     """
     Returns a set of eigenvectors of complete graph of size q as column vectors of a matrix
@@ -76,7 +91,7 @@ def fourier_for_seq(int_seq, encodings):
     by get_encodings, where M = prod(qs) and qs is the alphabet size at each position.
     """
     L = len(int_seq)
-    all_U = list(powerset(range(L)))
+    all_U = get_all_interactions(L)
     all_U = [list(U) for U in all_U]
     epi_encs = []
     enc_1 = encodings[0][int_seq[0]]
@@ -132,7 +147,7 @@ def walsh_hadamard_from_seqs(bin_seqs):
     """
     bin_seqs_ = convert_01_bin_seqs(np.array(bin_seqs))
     L = len(bin_seqs_[0])
-    all_U = list(powerset(range(0, L)))
+    all_U = get_all_interactions(L)
     M = 2**L
     N = len(bin_seqs)
     X = np.zeros((N, len(all_U)))

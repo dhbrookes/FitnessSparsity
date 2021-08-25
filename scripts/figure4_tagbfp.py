@@ -39,12 +39,8 @@ emp_beta = data_utils.calculate_mtagbfp_wh_coefficients()
 beta_mag_sq = emp_beta**2 / np.sum(emp_beta**2)  # normalize sum of squares to one
 bm_fv = utils.calc_frac_var_explained(emp_beta)
 
-# get contact map and calculate neighborhoods
-bin_cm_sub = data_utils.get_mtagbfp_binarized_contact_map()
-V = structure_utils.contact_map_to_neighborhoods(bin_cm_sub)
-
 # calculate the coefficient variances corresponding to neighborhoods
-gnk_beta_var_ = gnk_model.calc_beta_var(L, q, V)
+gnk_beta_var_, V = data_utils.calculate_mtagbfp_gnk_wh_coefficient_vars(return_neighborhoods=True)
 gnk_beta_var = gnk_beta_var_/np.sum(gnk_beta_var_) # normalize beta
 gnk_sparsity = np.count_nonzero(gnk_beta_var)
 pv_at_gnk = 100*bm_fv[gnk_sparsity]

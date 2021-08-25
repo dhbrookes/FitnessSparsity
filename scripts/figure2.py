@@ -101,7 +101,6 @@ for i, K in enumerate(rn_Ks):
 
 for i, K in enumerate(an_Ks):
     S_an[i] = gnk_model.calc_an_sparsity(L, q, K)
-    S_an_per[i] = 1 + L*2**(K-1)
     
 for i, K in enumerate(bn_Ks):
     S_bn[i] = gnk_model.calc_bn_sparsity(L, q, K) 
@@ -110,7 +109,7 @@ ax = axes[1, 0]
 colors = sns.color_palette('Set1', n_colors=3)
 ax.plot(rn_Ks, S_rn_max, c=colors[1],ls='--', marker='.', label='Uniform Bound', markersize=5)
 ax.plot(rn_Ks, S_rn_mean, c=colors[1], marker='.', label='Random Expectation', markersize=5)
-ax.plot(an_Ks, S_an_per, c=colors[2], marker='D', label='Adjacent', markersize=3)
+ax.plot(an_Ks, S_an, c=colors[2], marker='D', label='Adjacent', markersize=3)
 ax.plot(bn_Ks, S_bn, c=colors[0], marker='^', label='Block', markersize=3)
 ax.set_ylabel("Sparsity", fontsize=14)    
 ax.set_xlabel("$K$", fontsize=14)
@@ -149,4 +148,4 @@ ax.set_ylabel("Fraction Recovered at $C \cdot S \log(q^L)$", fontsize=12)
 ax.set_xlim([0, 3])
 ax.set_ylim([-0.01, 1.01])
 
-plt.savefig('plots/figure2.png', dpi=300, bbox_inches='tight', facecolor='white', transparent=False)
+plt.savefig('plots/figure2.png', dpi=300, bbox_inches='tight')
