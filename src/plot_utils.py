@@ -3,9 +3,15 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 from scipy.special import binom
-from scipy.stats import pearsonr
+from scipy.stats import pearsonr, ranksums
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from sklearn.neighbors import KernelDensity
 
+"""
+This module contains functions for making plots that are made multiple
+times in the main text and supplementary figure
+"""
 
 def plot_neighborhoods(ax, V, L, positions, label_rotation=0, s=120):
     """
@@ -52,7 +58,8 @@ def plot_beta_comparison(ax, L, num_coeffs,
                          arrow2_text_xy=(83, 0.54), 
                          ticks=None, 
                          yticks=(-0.5, -0.25, 0, 0.25, 0.5), 
-                         yticklabels=('0.5', '0.25', '0', '0.25', '0.5')
+                         yticklabels=('0.5', '0.25', '0', '0.25', '0.5'),
+                         order_label_fontsize=10
                         ):
     """
     Makes plots comparing empirical Fourier coefficient magnitudes with 
@@ -78,7 +85,7 @@ def plot_beta_comparison(ax, L, num_coeffs,
         ax.plot((tick, tick), (-1, 1), c='k', ls='--', lw=0.5, alpha=0.5)
         if i > 2 and i <= max_order:
             if use_order_labels:
-                ax.text(tick+order_lbl_offset, order_lbl_height, "$r=%i$" %i)
+                ax.text(tick+order_lbl_offset, order_lbl_height, "$r=%i$" %i, fontsize=order_label_fontsize)
                 
     if use_order_labels:
         ax.annotate("",
@@ -88,7 +95,7 @@ def plot_beta_comparison(ax, L, num_coeffs,
                                     connectionstyle="arc3,rad=0.15"),
                     )
 
-        ax.text(arrow1_text_xy[0], arrow1_text_xy[1], "$r=1$")
+        ax.text(arrow1_text_xy[0], arrow1_text_xy[1], "$r=1$", fontsize=order_label_fontsize)
 
         ax.annotate("",
                     xy=arrow2_xy, xycoords='data',
@@ -97,7 +104,7 @@ def plot_beta_comparison(ax, L, num_coeffs,
                                     connectionstyle="arc3,rad=0.15"),
                     )
 
-        ax.text(arrow2_text_xy[0], arrow2_text_xy[1], "$r=2$")
+        ax.text(arrow2_text_xy[0], arrow2_text_xy[1], "$r=2$", fontsize=order_label_fontsize)
 
     ax.tick_params(axis='y', which='major', direction='out')
     ax.spines['bottom'].set_visible(False)
@@ -132,6 +139,7 @@ def plot_percent_variance_explained(ax, emp_beta_pv,
                     edgecolor='none', label='GNK std. dev.', zorder=10)
     
     pv_at_gnk = emp_beta_pv[gnk_sparsity]
+    print("Percent variance at GNK sparsity: %.4f" % pv_at_gnk)
     ax.plot((gnk_sparsity, gnk_sparsity), (0, pv_at_gnk), ls='--', c='k', lw=0.75, zorder=0)
     ax.plot((0, gnk_sparsity), (pv_at_gnk, pv_at_gnk), ls='--', c='k', lw=0.75)
     ax.scatter([gnk_sparsity], [pv_at_gnk], edgecolor='k', facecolor='none', 
@@ -139,7 +147,7 @@ def plot_percent_variance_explained(ax, emp_beta_pv,
 
     ax.set_xlim([0, xlim])
     ax.set_ylim([0, 100.5])
-    ax.set_ylabel("Percent variance explained", labelpad=2, fontsize=12)
+    ax.set_ylabel("% variance explained", labelpad=2, fontsize=12)
     ax.set_xlabel("Number of largest coefficients", fontsize=12)
     ax.set_xticks(xticks)
 
@@ -215,9 +223,9 @@ def plot_lasso_results(ax, lasso_results_dict,
                 markeredgewidth=0.5)
     ax.plot(ns, mean_r, c=colors[1], lw=1, marker='o', markersize=3, zorder=10)
     ax.plot((pred_num_samples, pred_num_samples), (0, r2_at_pred), 
-            ls='--', c='k', lw=0.75, zorder=0)
+            ls='--', c='k', lw=0.75, zorder=12)
     ax.plot((0, pred_num_samples), (r2_at_pred, r2_at_pred), 
-            ls='--', c='k', lw=0.75)
+            ls='--', c='k', lw=0.75, zorder=12)
     
     ax.scatter([pred_num_samples], [r2_at_pred],
                edgecolor='k', facecolor=colors[0], 
@@ -272,3 +280,107 @@ def plot_lasso_example_inset(axins, example_results,
     axins.spines['right'].set_visible(True)
     axins.spines['top'].set_visible(True)
     return axins
+
+
+def plot_detailed_dists(ax, dists, position_labels):
+    """
+    Plots the detailed distance matrices that are shown in the Supplementary.
+    """
+    colormap = sns.color_palette('crest', as_cmap=True)
+    im = ax.imshow(dists, cmap=colormap)
+    L = dists.shape[0]
+    ax.set_xticks(range(L))
+    ax.set_yticks(range(L))
+    ax.xaxis.tick_top()
+    for (j,i),label in np.ndenumerate(dists):
+        ax.text(i, j, "%.1f"%label, ha='center', va='center', c='w', fontsize=6)
+
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.1)
+    cbar = plt.colorbar(im, cax=cax)
+    cbar.set_label("Distance ($\AA$)", rotation=270, labelpad=15)
+
+    ax.set_xticklabels(position_labels, rotation=60)
+    ax.set_yticklabels(position_labels)
+    ax.tick_params(axis='x', which='minor', rotation=60)
+    ax.tick_params(axis='x', which='both', length=0)
+    ax.tick_params(axis='y', which='both', length=0)
+    
+    ax.spines['right'].set_visible(True)
+    ax.spines['top'].set_visible(True)
+    ax.set_xlabel("Position")
+    ax.xaxis.set_label_position('top') 
+    ax.set_ylabel("Position")
+    ax.set_aspect('equal')
+    ax.grid(False)
+    return ax
+
+
+def compare_gnk_id_coeffs(ax, emp_beta_sq, gnk_beta_var, bandwidth=0.01, 
+                          xmax=0.4, zero_bar_height=-1.25, nz_bar_height=-3):
+    """
+    Computes and plots the Kernel Density Estimate of empirical coefficients
+    corresponding to zero and nonzero GNK coefficients, as shown in the
+    SI.
+    """
+    colors = sns.color_palette('tab10')
+    plot_gnk_vals = np.sqrt(gnk_beta_var)
+    plot_emp_vals = np.sqrt(emp_beta_sq)
+    nz_idx = np.nonzero(gnk_beta_var)
+    nz_vals = plot_emp_vals[nz_idx]
+    zero_idx = np.where(gnk_beta_var==0)
+    zero_vals = plot_emp_vals[zero_idx]
+    kde1 = KernelDensity(bandwidth=bandwidth, kernel='gaussian')
+    kde1.fit(zero_vals.reshape(-1, 1))
+    
+    kde2 = KernelDensity(bandwidth=bandwidth, kernel='gaussian')
+    kde2.fit(nz_vals.reshape(-1, 1))
+    
+    xplot = np.linspace(0, xmax, 1000).reshape(-1, 1)
+    log_prob_zero = kde1.score_samples(xplot)
+    log_prob_nz = kde2.score_samples(xplot)
+    
+    ax.fill_between(xplot.flatten(), np.exp(log_prob_zero), 
+                    alpha=0.75, label="Zero GNK variance",
+                    facecolor=colors[0])
+    ax.fill_between(xplot.flatten(), np.exp(log_prob_nz), 
+                    alpha=0.75, label="Nonzero GNK variance", 
+                    facecolor=colors[1])
+    
+    ax.plot(zero_vals, np.full_like(zero_vals, zero_bar_height), '|k', markeredgewidth=0.35, c=colors[0])
+    ax.plot(nz_vals, np.full_like(nz_vals, nz_bar_height), '|k', markeredgewidth=0.35, c=colors[1])
+    
+    leg = ax.legend(fontsize=10, labelspacing=0.15, loc='upper right')
+    ax.plot((0, xmax), (0, 0), c='k', lw=0.5)
+    leg.get_frame().set_edgecolor('k')
+    leg.get_frame().set_linewidth(0.5)
+    leg.get_frame().set_boxstyle('Square', pad=0.05)
+    ax.set_xlabel("Magnitude of empirical Fourier coefficient")
+    ax.set_ylabel("Density")
+    ax.set_xlim([0, xmax])
+    ax.set_ylim([-4.5, np.max(np.exp(log_prob_zero))+2])
+    ax.grid(False)
+    return ax
+
+
+def pp_sci_not(num):
+    """
+    Pretty print scientific notation as, e.g. 2 x 10^7. 
+    """
+    base10 = np.log10(abs(num))
+    exp = int(np.floor(base10))
+    sig = num / 10**exp
+    return "$%.2f \\times 10^{%i}$"% (sig, exp)
+
+
+def wilcoxon_rank_sum(emp_beta_sq, gnk_beta_var):
+    """
+    Compute the Wilcoxon rank-sum test comparing the ranks
+    of empirical coefficients identified as nonzero by the GNK model
+    and those identified as zero.
+    """
+    nz_idx = np.nonzero(gnk_beta_var)[0]
+    zero_idx = np.where(gnk_beta_var==0)
+    emp_nz = emp_beta_sq[nz_idx]
+    emp_zero = gnk_beta_var[zero_idx]
+    return ranksums(emp_nz, emp_zero, alternative='greater')

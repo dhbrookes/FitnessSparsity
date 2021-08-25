@@ -1,4 +1,5 @@
 import numpy as np
+from tqdm import tqdm
 from itertools import chain, combinations
 
 
@@ -35,7 +36,13 @@ def fourier_basis_recursive(L, q):
     Recursively constructs the Fourier basis corresponding to the H(L, q) hamming graph 
     (i.e. graphs of sequences of length L with alphabet size q). Hamming graphs are the 
     Cartesian product H(L+1, q) = H(L, q) x Kq, and the eigevectors of a cartesian product 
-    (A x B) are the Kronecker product of the eigenvectors of A and B.
+    (A x B) are the Kronecker product of the eigenvectors of A and B. This method is much 
+    faster than constructing the the Fourier representation for each sequence individually
+    (as with fourier_for_seqs, below) but the resulting basis less interpretable
+    (i.e. it is difficult to associate rows with particular sequences and columns with
+    particular epistatic interactions). In all of this code, we enforce that beta is ordered
+    according to epistatic interactions, so DO NOT multiply the basis resulting from this
+    method by a sample of beta.
     """
     Pq = complete_graph_evs(q)
     phi = np.copy(Pq)
@@ -104,13 +111,14 @@ def fourier_from_seqs(int_seqs, qs):
     N = len(int_seqs)
     encodings = get_encodings(qs)
     phi = np.zeros((N, M))
-    for i, seq in enumerate(int_seqs):
+    for i, seq in enumerate(tqdm(int_seqs)):
         phi[i] = fourier_for_seq(seq, encodings) / np.sqrt(M)
     return phi
 
 
 def convert_01_bin_seqs(bin_seqs):
-    """Converts an array of {0, 1} binary sequences to {-1, 1} sequences"""
+    """Converts a numpy array of {0, 1} binary sequences to {-1, 1} sequences"""
+    assert type(bin_seqs) == np.ndarray
     bin_seqs[bin_seqs == 0] = -1
     return bin_seqs
 
@@ -122,7 +130,7 @@ def walsh_hadamard_from_seqs(bin_seqs):
     same array as fourier_from_seqs(bin_seqs, [2]*L), but is much
     faster.
     """
-    bin_seqs_ = convert_01_bin_seqs(bin_seqs)
+    bin_seqs_ = convert_01_bin_seqs(np.array(bin_seqs))
     L = len(bin_seqs_[0])
     all_U = list(powerset(range(0, L)))
     M = 2**L

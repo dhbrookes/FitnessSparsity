@@ -38,6 +38,14 @@ elif nm == 'his3p_big':
     savefile = "../results/his3p_big_lasso_results.npy"
     example_savefile = "../results/his3p_big_lasso_example.npy"
     
+elif nm == 'rna':
+    gnk_val = 13036
+    ns = [200, 300, 400] + list(np.arange(500, 25000, 500)) + [gnk_val]
+    alphas = [5e-7, 1e-7, 5e-6, 1e-6, 5e-5, 1e-5, 5e-4, 1e-4]
+    X, y = data_utils.load_rna_data()
+    savefile = "../results/rna_lasso_results.npy"
+    example_savefile = "../results/rna_lasso_example.npy"
+    
 
 alpha = empirical_lasso.determine_alpha(X, y, gnk_val)
 print("Optimal alpha at GNK predicted number of samples: %s" % alpha)

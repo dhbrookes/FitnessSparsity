@@ -38,12 +38,8 @@ emp_beta = data_utils.calculate_his3p_small_wh_coefficients()
 beta_mag_sq = emp_beta**2 / np.sum(emp_beta**2)  # normalize sum of squares to one
 bm_fv = utils.calc_frac_var_explained(emp_beta)
 
-# get contact map and calculate neighborhoods
-bin_cm = data_utils.get_his3p_binarized_contact_map()
-V = structure_utils.contact_map_to_neighborhoods(bin_cm)
-
-# calculate the coefficient variances corresponding to neighborhoods
-gnk_beta_var_ = gnk_model.calc_beta_var(L, q, V)
+# get gnk_coefficients
+gnk_beta_var_ = data_utils.calculate_his3p_small_gnk_wh_coefficient_vars()
 gnk_beta_var = gnk_beta_var_/np.sum(gnk_beta_var_) # normalize sum of variances to one
 gnk_sparsity = np.count_nonzero(gnk_beta_var)
 pv_at_gnk = 100*bm_fv[gnk_sparsity]
@@ -88,9 +84,13 @@ his3p_kwargs = {
     'yticklabels': ('0.40', '0.20', '0', '0.20', '0.40')
 }
 
-num_coeffs = int(np.sum([binom(L, i) for i in range(7)]))
-plot_utils.plot_beta_comparison(ax, L, num_coeffs, beta_mag_sq, gnk_beta_var, 
-                                use_order_labels=True, **his3p_kwargs)
+max_order = 6
+num_coeffs = int(np.sum([binom(L, i) for i in range(max_order+1)]))
+plot_utils.plot_beta_comparison(ax, L, num_coeffs, 
+                                beta_mag_sq, 
+                                gnk_beta_var, 
+                                use_order_labels=True, 
+                                **his3p_kwargs)
 
 
 
@@ -124,4 +124,4 @@ plot_utils.plot_lasso_example_inset(axins, example_results, **his3p_inset_kwargs
 
 
 plt.tight_layout()
-plt.savefig("plots/figure4_bottom.png", dpi=500, bbox_inches='tight', facecolor='white', transparent=False)
+plt.savefig("plots/figure4_his3p.png", dpi=500, bbox_inches='tight', transparent=True)

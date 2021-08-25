@@ -85,8 +85,13 @@ plot_utils.plot_neighborhoods(ax, V, L,
 
 # plot beta comparison
 ax = fig.add_subplot(gs[0, 1:3])
-num_coeffs = int(np.sum([binom(13, i) for i in range(6)])) # up to 5th order interactions
-plot_utils.plot_beta_comparison(ax, L, num_coeffs, beta_mag_sq, gnk_beta_var, use_order_labels=True)
+max_order = 5
+num_coeffs = int(np.sum([binom(13, i) for i in range(max_order+1)])) # up to 5th order interactions
+plot_utils.plot_beta_comparison(ax, L, num_coeffs, 
+                                beta_mag_sq, 
+                                gnk_beta_var, 
+                                max_order=max_order, 
+                                use_order_labels=True)
 
 
 # plot percent variance explained
@@ -179,5 +184,4 @@ plot_utils.plot_lasso_example_inset(axins, example_results)
 
 plt.subplots_adjust(hspace=0.08)
 plt.tight_layout()
-plt.savefig("plots/figure4_top.png", dpi=500, bbox_inches='tight', 
-            facecolor='white', transparent=False)
+plt.savefig("plots/figure4_tagbfp.png", dpi=500, bbox_inches='tight', transparent=True)

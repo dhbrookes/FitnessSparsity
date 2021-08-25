@@ -14,7 +14,7 @@ warnings.filterwarnings("ignore")
 plt.style.use(['seaborn-deep', 'plots/paper.mplstyle'])
 
 """
-This script produces Figure S2, which shows the sparsity of
+This script produces the SI figure which shows the sparsity of
 GNK fitness functions with Structural Neighborhoods as a function
 of the cutoff distance for structural contacts.
 
@@ -43,7 +43,7 @@ for thresh in tqdm(thresholds):
     his3p_sparsity.append(np.count_nonzero(his3p_gnk_beta_var))
 
 main_val = 4.5
-idx = np.where(np.abs(np.array(thresholds)- main_val) < 1e-12 )[0][0]
+idx = np.where(np.abs(np.array(thresholds) - main_val) < 1e-12)[0][0]
 
 fig, axes = plt.subplots(1, 2, figsize=(6, 3))
 
@@ -56,7 +56,7 @@ ax.scatter([main_val], [val], edgecolor='k', facecolor='none', zorder=11, s=15, 
 ax.set_xlim([1, 7])
 ax.set_ylim([0, 75])
 ax.set_ylabel("Sparsity", fontsize=12)
-ax.set_xlabel("Contact cutoff distance ($\AA$)", fontsize=12)
+ax.set_xlabel("Contact threshold distance ($\AA$)", fontsize=12)
 ax.set_xticks([1, 2, 3, 4, 4.5, 5, 6, 7])
 ax.set_yticks([0, 20, 40, val, 60, 80])
 
@@ -69,10 +69,10 @@ ax.scatter([main_val], [val], edgecolor='k', facecolor='none', zorder=11, s=15, 
 ax.set_xlim([1, 7])
 
 ax.set_ylabel("Sparsity", fontsize=12)
-ax.set_xlabel("Contact cutoff distance ($\AA$)", fontsize=12)
+ax.set_xlabel("Contact threshold distance ($\AA$)", fontsize=12)
 ax.set_xticks([1, 2, 3, 4, 4.5, 5, 6, 7])
 ax.set_yticks([0, 25, 50, val, 100])
 ax.set_ylim([0, 120])
 
 plt.tight_layout()
-plt.savefig("plots/figure_s2.png", dpi=500, bbox_inches='tight', facecolor='white')
+plt.savefig("plots/supp_fig_thresh_sparsity.png", dpi=500, bbox_inches='tight', facecolor='white')

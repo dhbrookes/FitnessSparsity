@@ -30,7 +30,7 @@ def run_lasso_experiment(X, y, alpha, ns, savefile, save_example_at=None,
     pearson = np.zeros((len(ns), replicates))
     print("Running LASSO tests...")
     for i, n in enumerate(tqdm(ns)):
-        for j in range(tqdm(replicates)):
+        for j in tqdm(range(replicates)):
             model = Lasso(alpha=alpha)
             X_train, _, y_train, _ = train_test_split(X, y, train_size=n)
             model.fit(X_train, y_train)

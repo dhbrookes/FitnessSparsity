@@ -31,7 +31,7 @@ qs = data_utils.HIS3P_BIG_QS
 L = 11
 
 # get WH coefficients
-emp_beta = data_utils.calculate_his3p_big_wh_coefficients()
+emp_beta = data_utils.calculate_his3p_big_fourier_coefficients()
 
 # Calculate fraction variance explained by empirical coefficients
 beta_mag_sq = emp_beta**2 / np.sum(emp_beta**2)  # normalize sum of squares to one
@@ -138,4 +138,4 @@ his3p_big_inset_kwargs = {
 plot_utils.plot_lasso_example_inset(axins, example_results, **his3p_big_inset_kwargs)
 
 plt.tight_layout() 
-plt.savefig("plots/figure_s1.png", dpi=500, bbox_inches='tight', facecolor='white', transparent=False)
+plt.savefig("plots/supp_fig_his3p_big.png", dpi=500, bbox_inches='tight', facecolor='white', transparent=False)

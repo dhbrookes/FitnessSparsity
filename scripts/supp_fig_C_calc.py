@@ -55,5 +55,5 @@ for j in range(len(Lqs)):
     ax.set_title("$L=%s, \,q=%s$" % (L, q))
     
 plt.tight_layout()
-plt.savefig("plots/figure_s3.png", dpi=300, bbox_inches='tight', facecolor='w', transparent=False)
+plt.savefig("plots/supp_fig_C_calc.png", dpi=300, bbox_inches='tight', facecolor='w', transparent=False)
 plt.show()
