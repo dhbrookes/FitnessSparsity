@@ -9,7 +9,7 @@ import gnk_model
 import utils
 import plot_utils
 
-plt.style.use(['seaborn-deep', 'plots/paper.mplstyle'])
+plt.style.use(['seaborn-deep', '../paper.mplstyle'])
 rcParams['axes.spines.right'] = True
 rcParams['axes.spines.top'] = True
 
@@ -26,7 +26,7 @@ cm = sns.color_palette("crest", as_cmap=True)
 
 Vs = [
     gnk_model.sample_random_neighborhoods(L, K),
-    gnk_model.build_adj_neighborhoods_periodic(L, K), 
+    gnk_model.build_adj_neighborhoods(L, K), 
     gnk_model.build_block_neighborhoods(L, K)
 ]
 
@@ -37,4 +37,3 @@ for i, ax in enumerate(axes):
     
 plt.tight_layout()
 plt.savefig('plots/figure1.png', dpi=500)
-plt.show()

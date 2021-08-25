@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import gnk_model
 import utils
 
-plt.style.use(['seaborn-deep', 'plots/paper.mplstyle'])
+plt.style.use(['seaborn-deep', '../paper.mplstyle'])
 
 """
 This script produces Figure 2. Run as:

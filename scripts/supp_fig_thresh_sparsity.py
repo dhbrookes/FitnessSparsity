@@ -11,7 +11,7 @@ import structure_utils
 import warnings
 warnings.filterwarnings("ignore")
 
-plt.style.use(['seaborn-deep', 'plots/paper.mplstyle'])
+plt.style.use(['seaborn-deep', '../paper.mplstyle'])
 
 """
 This script produces the SI figure which shows the sparsity of

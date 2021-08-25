@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 import itertools
-import RNA
 from Bio import PDB
 from tqdm import tqdm
 from sklearn.linear_model import Lasso
@@ -15,11 +14,10 @@ import gnk_model
 Utility functions for loading and processing empirical fitness function data
 """
 
-# hardcoded quantities
+# global variables
 MTAGBFP_POSITIONS = [20, 45, 63, 127, 143, 158, 168, 172, 174, 197, 206, 207, 227]
 HIS3P_BIG_QS = [2, 2, 3, 2, 2, 3, 3, 4, 2, 4, 4]
 HIS3P_POSITIONS = [145, 147, 148, 151, 152, 154, 164, 165, 168, 169, 170]
-RNA_POSITIONS = [2, 20, 21, 30, 43, 44, 52, 70]
 
 
 def load_mtagbfp_data():
@@ -90,127 +88,6 @@ def load_his3p_small_data():
     return X, np.array(y_match)
 
 
-#################
-#### RNA Data ###
-#################
-
-
-
-def dna_to_rna(seq):
-    """
-    Converts DNA sequences to RNA sequences.
-    """
-    rs = []
-    for s in seq:
-        if s == 'T':
-            rs.append('U')
-        else:
-            rs.append(s)
-    return "".join(rs)
-
-
-def insert(base_seq, positions, sub_seq):
-    """
-    Inserts a subsequence into a base sequence
-    """
-    new_seq = list(base_seq)
-    for i, p in enumerate(positions):
-        new_seq[p-1] = sub_seq[i]
-    return "".join(new_seq)
-
-
-def get_rna_base_seq():
-    """
-    Returns the sequence of RFAM: AANN01066007.1 
-    """
-    base_seq = "CTGAGCCGTTACCTGCAGCTGATGAGCTCCAAAAAGAGCGAAACCTGCTAGGTCCTGCAGTACTGGCTTAAGAGGCT"
-
-
-def load_rna_data():
-    """
-    Constructs and returns the data corresponding to the quasi-empirical RNA fitness function
-    of the Hammerhead ribozyme HH9. 
-    """
-    base_seq = get_rna_base_seq()
-    base_seq = dna_to_rna(base_seq)
-    positions = RNA_POSITIONS
-    L = len(positions)
-    q = 4
-    
-    # construct insertion sequences
-    nucs = ["A", "U", "C", "G"]
-    nucs_idx = {nucs[i]: i for i in range(len(nucs))}
-    seqs_as_list = list(itertools.product(nucs, repeat=len(positions)))
-    int_seqs = [[nucs_idx[si] for si in s] for s in seqs_as_list]
-    seqs = ["".join(s) for s in seqs_as_list]
-    
-    y = []
-    print("Calculating free energies...")
-    for s in tqdm(seqs):
-        full = insert(base_seq, positions, s)
-        (ss, mfe) = RNA.fold(full)
-        y.append(mfe)
-    
-    print("Constructing design matrix...")
-    X = utils.fourier_from_seqs(int_seqs, [4]*L)
-    return X, np.array(y)
-    
-    
-def pairs_to_neighborhoods(positions, pairs):
-    """
-    Converts a list of pairs of interacting positions into a set of neighborhoods.
-    """
-    V = []
-    for i, p in enumerate(positions):
-        Vp = [i+1]
-        for pair in pairs:
-            if pair[0] == p:
-                Vp.append(positions.index(pair[1]) + 1)
-            elif pair[1] == p:
-                Vp.append(positions.index(pair[0]) + 1)
-        V.append(sorted(Vp))
-    return V 
-
-
-def find_pairs(ss):
-    """
-    Finds interacting pairs in a RNA secondary structure
-    """
-    pairs = []
-    op = []
-    N = len(ss)
-    for i in range(N):
-        if ss[i] == '(':
-            op.append(i)
-        elif ss[i] == ')':
-            pair = (op.pop(), i)
-            pairs.append(pair)
-    return pairs
-
-
-def sample_structures_and_find_pairs(base_seq, positions, samples=10000):
-    """
-    Samples secondary structures from the Boltzmann distribution 
-    and finds pairs of positions that are paired in any of the
-    sampled strutures.
-    """
-    md = RNA.md()
-    md.uniq_ML = 1
-    fc = RNA.fold_compound(base_seq, md)
-    (ss, mfe) = fc.mfe()
-    fc.exp_params_rescale(mfe)
-    fc.pf()
-
-    important_pairs = set()
-    for s in fc.pbacktrack(10000):
-        pairs = find_pairs(s)
-        for p in pairs:
-            if p[0] in positions and p[1] in positions:
-                if p[0] > p[1]:
-                    print(p, s)
-                important_pairs.add(tuple(p))
-    return important_pairs
-
 
 #######################
 ### His3p(big) data ###
@@ -224,14 +101,15 @@ must run find_his3p_big_sequences(), followed by build_his3p_fourier(), and then
 load_his3p_big_fourier().
 """
 
-def find_his3p_big_sequences():
+def find_his3p_big_sequences(save=False):
     """
     Searches through the His3p raw data to find sequences with fitness data that
     correspond to combinations of extant amino acids at each position (i.e. the 
     most frequently occuring amino acids at each position in the data). See page
     4 of Pokusaeva et. al. (2019) for more information about these extant sequences. 
-    Saves a dictionary containing the found sequences, corresponding fitness values,
-    and indices in the raw data.
+    Returns a dictionary containing the found sequences, corresponding fitness values,
+    and indices in the raw data. This takes some time to run, so there is an option
+    to save the dictionary into the results fold by setting save=True. 
     """
     df = pd.read_csv("../data/his3p_raw_data.csv")
     qs = HIS3P_BIG_QS
@@ -272,17 +150,24 @@ def find_his3p_big_sequences():
         idx_match.append(i)
         num += 1
 
-    save_dict = {"seq": int_match, "y": y_match, "idx": idx_match}
-    np.save("../results/his3p_big_data.npy", save_dict)
+    out_dict = {"seq": int_match, "y": y_match, "idx": idx_match}
+    if save:
+        np.save("../results/his3p_big_data.npy", out_dict)
+    return out_dict
     
     
-def build_his3p_big_fourier():
+def build_his3p_big_fourier(save=False):
     """
-    Converts the His3p(big) sequences into Fourier encodings. The resulting
-    matrix is quite large (~20GB) and is saved into the results folder.
+    Converts the His3p(big) sequences into Fourier encodings and returns the matrix
+    If save=True, then the resulting matrix (which is ~20GB) will be saved into the results
+    folder for fast loading. Will try to load the dict resulting from find_his3p_big_sequences,
+    but will otherwise run that method.
     """
     qs = HIS3P_BIG_QS
-    save_dict = np.load("../results/his3p_big_data.npy",allow_pickle=True).item()
+    try:
+        save_dict = np.load("../results/his3p_big_data.npy",allow_pickle=True).item()
+    except FileNotFoundError:
+        save_dict = find_his3p_big_sequences(save=save)
     int_seqs = save_dict['seq']
     M = np.prod(qs)
     N = len(int_seqs)
@@ -291,18 +176,30 @@ def build_his3p_big_fourier():
     print("Calculating Fourier encoding for each sequence...")
     for i, seq in enumerate(tqdm(int_seqs)):
         phi[i] = utils.fourier_for_seq(seq, encodings) / np.sqrt(M)
-    np.save('../results/his3p_big_fourier.npy', phi)
+    if save:
+        np.save('../results/his3p_big_fourier.npy', phi)
+    return phi
 
 
-def load_his3p_big_data():
+def load_his3p_big_data(save=False):
     """
     Loads His3p(big) fitness data from Pokusaeva, et. al. (2019). Returns 
     the data  as (X, y), where X is a matrix of Fourier encodings of sequences 
-    and y is an array of corresponding fitness values.
+    and y is an array of corresponding fitness values. Will try to load dictionary
+    from find_his3p_big_sequences and the Fourier matrix resulting from 
+    build_his3p_big_fourier, but will otherwise run those method 
+    (if save=True, then the dictionary and matrix will be saved for future use).
     """
-    save_dict = np.load("../results/his3p_big_data.npy", allow_pickle=True).item()
+    try:
+        save_dict = np.load("../results/his3p_big_data.npy",allow_pickle=True).item()
+    except FileNotFoundError:
+        save_dict = find_his3p_big_sequences(save=save)
+
     y = np.array(save_dict['y'])
-    X = np.load("../results/his3p_big_fourier.npy")
+    try:
+         X = np.load("../results/his3p_big_fourier.npy")
+    except FileNotFoundError:
+        X  = build_his3p_big_fourier(save=save)
     return X, y
 
 
@@ -383,8 +280,6 @@ def _calculate_wh_coefficients_complete(which_data):
     elif which_data == 'his3p_big':
         X, y = load_his3p_big_data()
         alpha = 1e-10  # slightly higher because data is less complete than others
-    elif which_data == 'rna':
-        X, y = load_rna_data()
     model = Lasso(alpha=alpha)
     model.fit(X, y)
     beta = model.coef_
@@ -413,18 +308,6 @@ def calculate_his3p_big_fourier_coefficients():
     return _calculate_wh_coefficients_complete('his3p_big')
 
 
-def calculate_rna_fourier_coefficients(fast=True):
-    """
-    Calculate Fourier coefficients of the RNA fitness function.
-    fast=True loads pre-calculated coefficients and fast=False
-    calculates them from scratch.
-    """
-    if fast:
-        return np.load("../results/rna_beta.npy")
-    else:
-        return _calculate_wh_coefficients_complete('rna')
-
-
 def calculate_mtagbfp_gnk_wh_coefficient_vars(return_neighborhoods=False):
     """
     Returns the variances of WH coefficients in GNK fitness functions with Structural
@@ -433,13 +316,13 @@ def calculate_mtagbfp_gnk_wh_coefficient_vars(return_neighborhoods=False):
     """
     L = 13
     q = 2
-    mtag_bin_cm = get_mtagbfp_binarized_contact_map()
-    mtag_V = structure_utils.contact_map_to_neighborhoods(mtag_bin_cm)
-    mtag_gnk_beta_var = gnk_model.calc_beta_var(L, q, mtag_V)
+    bin_cm = get_mtagbfp_binarized_contact_map()
+    V = structure_utils.contact_map_to_neighborhoods(bin_cm)
+    gnk_beta_var = gnk_model.calc_beta_var(L, q, V)
     if return_neighborhoods:
-        return mtag_gnk_beta_var, mtag_V
+        return gnk_beta_var, V
     else:
-        return mtag_gnk_beta_var
+        return gnk_beta_var
 
 
 def calculate_his3p_small_gnk_wh_coefficient_vars(return_neighborhoods=False):
@@ -449,10 +332,10 @@ def calculate_his3p_small_gnk_wh_coefficient_vars(return_neighborhoods=False):
     """
     L = 11
     q = 2
-    his3p_bin_cm = get_his3p_binarized_contact_map()
-    his3p_V = structure_utils.contact_map_to_neighborhoods(his3p_bin_cm)
-    his3p_gnk_beta_var = gnk_model.calc_beta_var(L, q, his3p_V)
+    bin_cm = get_his3p_binarized_contact_map()
+    V = structure_utils.contact_map_to_neighborhoods(bin_cm)
+    gnk_beta_var = gnk_model.calc_beta_var(L, q, V)
     if return_neighborhoods:
-        return his3p_gnk_beta_var, his3p_V
+        return gnk_beta_var, V
     else:
-        return his3p_gnk_beta_var
+        return gnk_beta_var

@@ -6,7 +6,7 @@ import seaborn as sns
 
 import C_calculation
 
-plt.style.use(['seaborn-deep', 'plots/paper.mplstyle'])
+plt.style.use(['seaborn-deep', '../paper.mplstyle'])
 
 """
 This script produces Figure S3, which displays a detailed summary of the 

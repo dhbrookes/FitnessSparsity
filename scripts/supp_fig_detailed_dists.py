@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings("ignore")
 
-plt.style.use(['seaborn-deep', '../scripts/plots/paper.mplstyle'])
+plt.style.use(['seaborn-deep', '../paper.mplstyle'])
 
 mtag_dists = data_utils.get_mtagbfp_contact_map()
 his3p_dists = data_utils.get_his3p_contact_map()

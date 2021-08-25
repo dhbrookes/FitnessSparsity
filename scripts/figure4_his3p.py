@@ -17,7 +17,7 @@ import plot_utils
 import warnings
 warnings.filterwarnings("ignore")
 
-plt.style.use(['seaborn-deep', 'plots/paper.mplstyle'])
+plt.style.use(['seaborn-deep', '../paper.mplstyle'])
 
 """
 This script produces the second row of Figure 4D, which displays the results

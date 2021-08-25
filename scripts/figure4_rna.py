@@ -13,38 +13,31 @@ import C_calculation
 import utils
 import structure_utils
 import data_utils
+import rna_utils
 import plot_utils
 
-plt.style.use(['seaborn-deep', 'plots/paper.mplstyle'])
+plt.style.use(['seaborn-deep', '../paper.mplstyle'])
 
 
 q = 4
 L = 8
 
-positions = data_utils.RNA_POSITIONS
+positions = rna_utils.RNA_POSITIONS
 
 # get Fourier coefficients
-emp_beta = data_utils.calculate_rna_fourier_coefficients(fast=True)
+emp_beta = rna_utils.calculate_rna_fourier_coefficients()
 
 # Calculate fraction variance explained by empirical coefficients
 beta_mag_sq = emp_beta**2 / np.sum(emp_beta**2)  # normalize sum of squares to one
 bm_fv = utils.calc_frac_var_explained(emp_beta)
 
-# calculate neighborhoods for GNK
-important_pairs = {(21, 52), (20, 44), (20, 52), (20, 43)}  # pre-calculated
-# important_pairs = sample_structures_and_find_pairs(data_utils.get_rna_base_seq(), positions, samples=10000) # uncomment to calculate from scratch
-# add adjacent pairs
-important_pairs = important_pairs.union({(20, 21), (43, 44)})
-V = data_utils.pairs_to_neighborhoods(positions, important_pairs)
-
 # calculate the coefficient variances corresponding to neighborhoods
-gnk_beta_var_ = gnk_model.calc_beta_var(L, q, V)
+gnk_beta_var_, V = rna_utils.calculate_rna_gnk_wh_coefficient_vars(return_neighborhoods=True, 
+                                                                   pairs_from_scratch=False)
 gnk_beta_var = gnk_beta_var_/np.sum(gnk_beta_var_) # normalize sum of variances to one
 gnk_sparsity = np.count_nonzero(gnk_beta_var)
 pv_at_gnk = 100*bm_fv[gnk_sparsity]
 pred_num_samples = int(np.ceil(gnk_sparsity*C_calculation.C_VAL*np.log10(q**L)))
-
-# pred_num_samples = 13036
 
 print("Sparsity of RNA Structural GNK model: %i" % gnk_sparsity)
 print("Number of samples to recover RNA GNK: %s" % pred_num_samples)

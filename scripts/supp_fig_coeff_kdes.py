@@ -11,7 +11,7 @@ from scipy.special import binom
 import warnings
 warnings.filterwarnings("ignore")
 
-plt.style.use(['seaborn-deep', '../scripts/plots/paper.mplstyle'])
+plt.style.use(['seaborn-deep', '../paper.mplstyle'])
 
 """
 This script makes the plots comparing Kernel Density Estimates of empirical coefficients
