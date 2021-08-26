@@ -171,7 +171,7 @@ def calculate_rna_gnk_wh_coefficient_vars(pairs_from_scratch=False, return_neigh
 
     # add adjacent pairs
     important_pairs = important_pairs.union({(20, 21), (43, 44)})
-    V = pairs_to_neighborhoods(positions, important_pairs)
+    V = pairs_to_neighborhoods(RNA_POSITIONS, important_pairs)
 
     gnk_beta_var = gnk_model.calc_beta_var(L, q, V)
     if return_neighborhoods:

@@ -156,11 +156,10 @@ def find_his3p_big_sequences(save=False):
     return out_dict
     
     
-def build_his3p_big_fourier(save=False):
+def build_his3p_big_fourier():
     """
     Converts the His3p(big) sequences into Fourier encodings and returns the matrix
-    If save=True, then the resulting matrix (which is ~20GB) will be saved into the results
-    folder for fast loading. Will try to load the dict resulting from find_his3p_big_sequences,
+    Will try to load the dict resulting from find_his3p_big_sequences,
     but will otherwise run that method.
     """
     qs = HIS3P_BIG_QS
@@ -176,8 +175,6 @@ def build_his3p_big_fourier(save=False):
     print("Calculating Fourier encoding for each sequence...")
     for i, seq in enumerate(tqdm(int_seqs)):
         phi[i] = utils.fourier_for_seq(seq, encodings) / np.sqrt(M)
-    if save:
-        np.save('../results/his3p_big_fourier.npy', phi)
     return phi
 
 
@@ -186,9 +183,8 @@ def load_his3p_big_data(save=False):
     Loads His3p(big) fitness data from Pokusaeva, et. al. (2019). Returns 
     the data  as (X, y), where X is a matrix of Fourier encodings of sequences 
     and y is an array of corresponding fitness values. Will try to load dictionary
-    from find_his3p_big_sequences and the Fourier matrix resulting from 
-    build_his3p_big_fourier, but will otherwise run those method 
-    (if save=True, then the dictionary and matrix will be saved for future use).
+    from find_his3p_big_sequences, but will otherwise run that method 
+    (if save=True, then the dictionary will be saved for future use).
     """
     try:
         save_dict = np.load("../results/his3p_big_data.npy",allow_pickle=True).item()
@@ -208,7 +204,6 @@ def _get_contact_map(which_data):
     Returns the contact map corresponding to either the TagBFP 
     (which_data='mtagbfp') or His3p data (which_data='his3p'). 
     """
-    
     if which_data == 'mtagbfp':
         name = '3m24'
         pos = MTAGBFP_POSITIONS
@@ -266,7 +261,7 @@ def get_his3p_binarized_contact_map(threshold=4.5):
     return _get_binarized_contact_map('his3p', threshold=threshold)
 
 
-def _calculate_wh_coefficients_complete(which_data):
+def _calculate_wh_coefficients_complete(which_data, save=False):
     """
     Calculate the WH coefficients of the complete mTagBFP (which_data='mtagbfp'),
     His3p(small) (which_data='his3p_small') or His3p(big) (which_data='his3p_big') 
@@ -278,13 +273,20 @@ def _calculate_wh_coefficients_complete(which_data):
     elif which_data == 'his3p_small':
         X, y = load_his3p_small_data()
     elif which_data == 'his3p_big':
-        X, y = load_his3p_big_data()
-        alpha = 1e-10  # slightly higher because data is less complete than others
+        try:
+            beta = np.load("../results/his3p_big_beta.npy")
+            print("Loaded saved beta array.")
+            return beta
+        except FileNotFoundError:
+            X, y = load_his3p_big_data()
+            alpha = 1e-10  # slightly higher because data is less complete than others
     model = Lasso(alpha=alpha)
     print("Fitting Fourier coefficients (this may take some time)...")
     model.fit(X, y)
     beta = model.coef_
     beta[0] = model.intercept_
+    if which_data == 'his3p_big' and save:
+        np.save("../results/his3p_big_beta.npy", beta)
     return beta
 
     
@@ -302,11 +304,13 @@ def calculate_his3p_small_wh_coefficients():
     return _calculate_wh_coefficients_complete('his3p_small')
 
 
-def calculate_his3p_big_fourier_coefficients():
+def calculate_his3p_big_fourier_coefficients(save=False):
     """
     Calculate the Fourier coefficients of the His3p(big) fitness functions.
+    Since this takes a long time, there is an option to save the beta
+    coefficients in the results folder.
     """
-    return _calculate_wh_coefficients_complete('his3p_big')
+    return _calculate_wh_coefficients_complete('his3p_big', save=save)
 
 
 def calculate_mtagbfp_gnk_wh_coefficient_vars(return_neighborhoods=False):
