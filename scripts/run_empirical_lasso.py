@@ -12,7 +12,7 @@ are shown in Figure 4D.
 Run this script as 
     $ python run_lasso_exp.py <data_name>
 
-where <data_name> is either 'mtagbfp', 'his3p_small', or 'his3p_big'
+where <data_name> is either 'mtagbfp', 'his3p_small', 'his3p_big', or 'rna'
 
 """
 
@@ -37,7 +37,6 @@ elif nm == 'his3p_big':
     X, y = data_utils.load_his3p_big_data()
     savefile = "../results/his3p_big_lasso_results.npy"
     example_savefile = "../results/his3p_big_lasso_example.npy"
-    
 elif nm == 'rna':
     gnk_val = 13036
     ns = [200, 300, 400] + list(np.arange(500, 25000, 500)) + [gnk_val]

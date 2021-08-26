@@ -133,7 +133,7 @@ def calc_beta_var(L, qs, V):
     return beta_var
 
 
-def sample_gnk_fitness_function(L, qs, K=None,  V='random'):
+def sample_gnk_fitness_function(L, qs, V='random', K=None):
     """
     Sample a GNK fitness function given the sequence length, alphabet sizes
     and neighborhoods. If V='random', V='block', or V='adjacent', then
