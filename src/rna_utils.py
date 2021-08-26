@@ -143,7 +143,9 @@ def calculate_rna_fourier_coefficients(save=False):
         print("Loaded saved beta array.")
         return beta
     except FileNotFoundError:
+        alpha = 1e-12
         X, y = load_rna_data()
+        print("Fitting Fourier coefficients (this may take some time)...")
         model = Lasso(alpha=alpha)
         model.fit(X, y)
         beta = model.coef_

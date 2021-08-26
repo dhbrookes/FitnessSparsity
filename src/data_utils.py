@@ -281,6 +281,7 @@ def _calculate_wh_coefficients_complete(which_data):
         X, y = load_his3p_big_data()
         alpha = 1e-10  # slightly higher because data is less complete than others
     model = Lasso(alpha=alpha)
+    print("Fitting Fourier coefficients (this may take some time)...")
     model.fit(X, y)
     beta = model.coef_
     beta[0] = model.intercept_
