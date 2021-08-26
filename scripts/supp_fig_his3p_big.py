@@ -68,7 +68,6 @@ for U in all_U:
         n = 1
     else:
         n = np.prod([qs[k-1]-1 for k in U])
-
     num_per[sz] += n
 up_to = [np.sum([num_per[i] for i in range(j+1)]) for j in range(L+1)]
 

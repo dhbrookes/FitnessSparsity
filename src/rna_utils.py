@@ -4,6 +4,7 @@ import RNA
 from tqdm import tqdm
 from sklearn.linear_model import Lasso
 
+import data_utils
 import utils
 import gnk_model
 
@@ -138,7 +139,9 @@ def calculate_rna_fourier_coefficients(save=False):
     then coefficients will be saved to the results folder.
     """
     try:
-        return np.load("../results/rna_beta.npy")
+        beta = np.load("../results/rna_beta.npy")
+        print("Loaded saved beta array.")
+        return beta
     except FileNotFoundError:
         X, y = load_rna_data()
         model = Lasso(alpha=alpha)
@@ -159,13 +162,14 @@ def calculate_rna_gnk_wh_coefficient_vars(pairs_from_scratch=False, return_neigh
     q = 4
 
     if pairs_from_scratch:
-        important_pairs = sample_structures_and_find_pairs(data_utils.get_rna_base_seq(), positions, samples=10000) # uncomment to calculate from scratch
+        important_pairs = sample_structures_and_find_pairs(data_utils.get_rna_base_seq(), 
+                                                           positions, samples=10000) # uncomment to calculate from scratch
     else:
         important_pairs = {(21, 52), (20, 44), (20, 52), (20, 43)}  # pre-calculated
 
     # add adjacent pairs
     important_pairs = important_pairs.union({(20, 21), (43, 44)})
-    V = data_utils.pairs_to_neighborhoods(positions, important_pairs)
+    V = pairs_to_neighborhoods(positions, important_pairs)
 
     gnk_beta_var = gnk_model.calc_beta_var(L, q, V)
     if return_neighborhoods:
