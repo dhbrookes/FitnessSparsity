@@ -40,5 +40,3 @@ of position $i$. An example where we sample a $L=3$, $q=2$ fitness function with
 V = [[1, 2], [2], [1, 2, 3]]
 f = sample_gnk_fitness_function(3, 2, V=V)
 ```
-
-
