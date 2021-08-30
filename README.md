@@ -34,8 +34,8 @@ for information on the command line arguments required to run the script.
 Although it is not used in any of our analyses, the function `sample_gnk_fitness_function` in `src/gnk_model.py` may be of interest to some. 
 This function samples a fitness function from the GNK model given the sequence length `L`, alphabet size `q`, and a set of neighborhoods `V`. 
 `V` can be set to one of the string values `"random"`, `"adjacent"` or `"block"` if one wishes to use one of the standard neighborhood schemes; in this case,
-the optional `K` parameter must be also be input. Otherwise, `V` is a list of 1-indexed lists where the $i$-th list corresponds to the neighborhood
-of position $i$. An example where we sample a $L=3$, $q=2$ fitness function with custom neighborhoods is below:
+the optional `K` parameter must be also be input. Otherwise, `V` is a list of 1-indexed lists where the i-th list corresponds to the neighborhood
+of position i. An example where we sample a L=3, q=2 fitness function with custom neighborhoods is below:
 ```
 V = [[1, 2], [2], [1, 2, 3]]
 f = sample_gnk_fitness_function(3, 2, V=V)
