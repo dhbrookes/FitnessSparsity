@@ -1,6 +1,6 @@
-# Code for "On the sparsity of fitness functions and implications for learning" (2021)
+# Code for "On the sparsity of fitness functions and implications for learning", PNAS (2022)
 
-This code runs the analyses presenting in the pre-print, which is available [here](https://www.biorxiv.org/content/10.1101/2021.05.24.445506v1).
+This code runs the analyses presenting in the paper, which has been published in PNAS and is available [here](https://www.pnas.org/content/119/1/e2109649118).
 In order to run any of the code, you must install the dependencies via
 
 ```
